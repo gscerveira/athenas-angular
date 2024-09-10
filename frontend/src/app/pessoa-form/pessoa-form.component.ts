@@ -39,4 +39,59 @@ export class PessoaFormComponent {
     }
   }
 
+  onSearch() {
+    const nome = this.pessoaForm.get('nome')?.value;
+    if (nome) {
+      this.pessoaService.search(nome).subscribe(
+        pessoas => {
+          this.pessoas = pessoas;
+          this.selectedPessoa = null;
+        },
+        error => console.error('Erro ao pesquisar pessoas', error)
+      );
+    }
+  }
+
+  onSelect(pessoa: Pessoa) {
+    this.selectedPessoa = pessoa;
+    this.pessoaForm.patchValue(pessoa);
+  }
+
+  onUpdate() {
+    if (this.selectedPessoa && this.pessoaForm.valid) {
+      const updatedPessoa: Pessoa = { ...this.selectedPessoa, ...this.pessoaForm.value };
+      this.pessoaService.update(this.selectedPessoa.id!, updatedPessoa).subscribe(
+        response => {
+          console.log('Pessoa atualizada com sucesso!', response);
+          this.onSearch();
+        },
+        error => console.error('Erro ao atualizar pessoa', error)
+      );
+    }
+  }
+
+  onDelete() {
+    if (this.selectedPessoa) {
+      this.pessoaService.delete(this.selectedPessoa.id!).subscribe(
+        () => {
+          console.log('Pessoa deletada com sucesso!');
+          this.onSearch();
+          this.selectedPessoa = null;
+          this.pessoaForm.reset();
+        },
+        error => console.error('Erro ao deletar pessoa', error)
+      );
+    }
+  }
+
+  onCalculateIdealWeight() {
+    if (this.selectedPessoa) {
+      this.pessoaService.calculateIdealWeight(this.selectedPessoa.id!).subscribe(
+        response => {
+          alert(`Peso ideal: ${response.peso_ideal.toFixed(2)} kg`);
+        },
+        error => console.error('Erro ao calcular peso ideal', error)
+      );
+    }
+  }
 }
