@@ -1,16 +1,17 @@
-import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
 import { PessoaService } from '../pessoa.service';
 import { Pessoa } from '../pessoa.interface';
 
 @Component({
   selector: 'app-pessoa-form',
   standalone: true,
-  imports: [],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './pessoa-form.component.html',
   styleUrl: './pessoa-form.component.css'
 })
-export class PessoaFormComponent {
+export class PessoaFormComponent implements OnInit {
   pessoaForm: FormGroup;
   pessoas: Pessoa[] = [];
   selectedPessoa: Pessoa | null = null;
@@ -18,18 +19,44 @@ export class PessoaFormComponent {
   constructor(private formBuilder: FormBuilder, private pessoaService: PessoaService) {
     this.pessoaForm = this.formBuilder.group({
       nome: ['', Validators.required],
-      data_nasc: ['', Validators.required],
+      data_nasc: ['', [Validators.required, this.dateValidator]],
       cpf: ['', [Validators.required, Validators.minLength(11), Validators.maxLength(11)]],
       sexo: ['', Validators.required],
       altura: ['', [Validators.required, Validators.min(0)]],
       peso: ['', [Validators.required, Validators.min(0)]]
     });
+
+    this.pessoaForm.setValue({
+      nome: '',
+      data_nasc: '',
+      cpf: '',
+      sexo: '',
+      altura: '',
+      peso: ''
+    });
   }
+
+  ngOnInit() {
+      this.pessoaForm.valueChanges.subscribe(() => {
+        console.log('Formulário válido:', this.pessoaForm.valid);
+        console.log('Valores do formulário:', this.pessoaForm.value);
+        console.log('Erros no formulário:', this.pessoaForm.errors);
+      });
+  }
+
+  dateValidator(control: AbstractControl): {[key: string]: any} | null {
+    if (!control.value) {
+      return null;
+    }
+    const valid = /^\d{4}-\d{2}-\d{2}$/.test(control.value);
+    return valid ? null : { invalidDate: { value: control.value } };
+  } 
 
   onSubmit() {
     if (this.pessoaForm.valid) {
-      const pessoa: Pessoa = this.pessoaForm.value;
-      this.pessoaService.create(pessoa).subscribe(
+      const pessoaData = { ...this.pessoaForm.value };
+      pessoaData.data_nasc = this.ensureDateFormat(pessoaData.data_nasc);
+      this.pessoaService.create(pessoaData).subscribe(
         response => {
           console.log('Pessoa criada com sucesso!', response);
           this.pessoaForm.reset();
@@ -37,6 +64,14 @@ export class PessoaFormComponent {
         error => console.error('Erro ao criar pessoa', error)
       );
     }
+  }
+
+  ensureDateFormat(dateString: string): string {
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+      return dateString;
+    }
+    const [day, month, year] = dateString.split('-');
+    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
   }
 
   onSearch() {
@@ -54,7 +89,15 @@ export class PessoaFormComponent {
 
   onSelect(pessoa: Pessoa) {
     this.selectedPessoa = pessoa;
-    this.pessoaForm.patchValue(pessoa);
+    this.pessoaForm.patchValue({
+      ...pessoa,
+      data_nasc: this.formatDateForInput(pessoa.data_nasc)
+    });
+  }
+
+  formatDateForInput(dateString: string): string {
+    const [year, month, day] = dateString.split('-');
+    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
   }
 
   onUpdate() {
