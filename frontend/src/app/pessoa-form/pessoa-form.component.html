@@ -1,1 +1,42 @@
-<p>pessoa-form works!</p>
+<form [formGroup]="pessoaForm" (ngSubmit)="onSubmit()">
+    <div>
+        <label for="nome">Nome:</label>
+        <input id="nome" type="text" formControlName="nome">
+    </div>
+
+    <div>
+        <label for="data_nasc">Data de Nascimento:</label>
+        <input id="data_nasc" type="text" formControlName="data_nasc" placeholder="DD/MM/AAAA">
+    </div>
+
+    <div>
+        <label for="cpf">CPF:</label>
+        <input id="cpf" type="text" formControlname="cpf">
+    </div>
+
+    <div>
+        <label for="sexo">Sexo:</label>
+        <select id="sexo" formControlName="sexo">
+            <option value="">Selecione</option>
+            <option value="M">Masculino</option>
+            <option value="F">Feminino</option>
+        </select>
+    </div>
+
+    <div>
+        <label for="altura">Altura (m):</label>
+        <input id="altura" type="number" formControlName="altura" step="0.01">
+    </div>
+
+    <div>
+        <label for="peso">Peso (kg):</label>
+        <input id="peso" type="number" formControlName="peso" step="0.1">
+    </div>
+
+    <button type="submit" [disabled]="!pessoaForm.valid">Incluir</button>
+    <button type="button" (click)="onSearch()">Pesquisar</button>
+    <button type="button" (click)="onUpdate()" [disabled]="!selectedPessoa">Alterar</button>
+    <button type="button" (click)="onDelete()" [disabled]="!selectedPessoa">Excluir</button>
+    <button type="button" (click)="onCalculateIdealWeight()" [disabled]="!selectedPessoa">Calcular Peso Ideal</button>
+</form>
+

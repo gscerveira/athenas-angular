@@ -16,7 +16,7 @@ export class PessoaService {
   }
 
   search(nome: string): Observable<Pessoa[]> {
-    return this.http.get.<Pessoa[]>(`${this.apiUrl}?search=${encodeURIComponent(nome)}`);
+    return this.http.get<Pessoa[]>(`${this.apiUrl}?search=${encodeURIComponent(nome)}`);
   }
 
   update(id: number, pessoa: Pessoa): Observable<Pessoa> {
