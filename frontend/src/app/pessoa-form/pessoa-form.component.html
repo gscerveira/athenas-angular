@@ -40,3 +40,12 @@
     <button type="button" (click)="onCalculateIdealWeight()" [disabled]="!selectedPessoa">Calcular Peso Ideal</button>
 </form>
 
+<div *ngIf="pessoa.length > 0">
+    <h2>Resultados da pesquisa:</h2>
+    <ul>
+        <li *ngFor="let pessoa of pessoas" (click)="onSelect(pessoa)" [class.selected]="selectedPessoa === pessoa">
+            {{pessoa.nome}} - {{pessoa.cpf}}
+        </li>
+    </ul>
+</div>
+
